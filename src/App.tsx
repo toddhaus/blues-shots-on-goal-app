@@ -1,5 +1,25 @@
 import React, { useState } from "react";
 
+// --- Types for strict TypeScript ---
+type PeriodStats = {
+  label: string;
+  homeShots: number;
+  awayShots: number;
+  homeGoals: number;
+  awayGoals: number;
+};
+
+type GameSummary = {
+  date: string;
+  homeTeam: string;
+  awayTeam: string;
+  periods: PeriodStats[];
+  homeTotalShots: number;
+  awayTotalShots: number;
+  homeTotalGoals: number;
+  awayTotalGoals: number;
+};
+
 // --- Helpers and constants ---
 const periodLabels = ["1", "2", "3", "OT"];
 const initialStats = () => ({
@@ -11,15 +31,15 @@ const initialStats = () => ({
 
 export default function ShotsOnGoalApp() {
   // --- State ---
-  const [period, setPeriod] = useState(0);
+  const [period, setPeriod] = useState<number>(0);
   const [stats, setStats] = useState(initialStats());
-  const [lastAction, setLastAction] = useState(null);
-  const [homeTeam, setHomeTeam] = useState("");
-  const [awayTeam, setAwayTeam] = useState("");
-  const [gameStarted, setGameStarted] = useState(false);
-  const [savedGames, setSavedGames] = useState([]);
+  const [lastAction, setLastAction] = useState<null | (() => void)>(null);
+  const [homeTeam, setHomeTeam] = useState<string>("");
+  const [awayTeam, setAwayTeam] = useState<string>("");
+  const [gameStarted, setGameStarted] = useState<boolean>(false);
+  const [savedGames, setSavedGames] = useState<GameSummary[]>([]);
 
-  // --- Export CSV (Upgraded) ---
+  // --- Export CSV ---
   function exportToCSV() {
     if (!savedGames.length) return;
     const header = [
@@ -44,7 +64,7 @@ export default function ShotsOnGoalApp() {
 
   // --- Save Game / New Game ---
   function handleSaveGame() {
-    const summary = {
+    const summary: GameSummary = {
       date: new Date().toLocaleString(),
       homeTeam,
       awayTeam,
@@ -71,27 +91,37 @@ export default function ShotsOnGoalApp() {
   }
 
   // --- Main logic for SOG/Goals/Undo/Reset ---
-  const updateStat = (team, statType, delta) => {
+  const updateStat = (
+    team: "home" | "away",
+    statType: "homeShots" | "awayShots" | "homeGoals" | "awayGoals",
+    delta: number
+  ) => {
     setStats((prev) => {
       const newArr = [...prev[statType]];
       newArr[period] += delta;
       return { ...prev, [statType]: newArr };
     });
   };
-  const handleShot = (team) => {
-    const statType = team === "home" ? "homeShots" : "awayShots";
+
+  const handleShot = (team: "home" | "away") => {
+    const statType =
+      team === "home" ? "homeShots" : "awayShots";
     updateStat(team, statType, 1);
     setLastAction(() => () => updateStat(team, statType, -1));
   };
-  const handleGoal = (team) => {
-    const statType = team === "home" ? "homeGoals" : "awayGoals";
+
+  const handleGoal = (team: "home" | "away") => {
+    const statType =
+      team === "home" ? "homeGoals" : "awayGoals";
     updateStat(team, statType, 1);
     setLastAction(() => () => updateStat(team, statType, -1));
   };
+
   const handleUndo = () => {
     if (lastAction) lastAction();
     setLastAction(null);
   };
+
   const handleReset = () => {
     setStats(initialStats());
     setLastAction(null);
