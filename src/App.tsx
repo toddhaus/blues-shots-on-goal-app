@@ -36,6 +36,8 @@ export default function ShotsOnGoalApp() {
   const [lastAction, setLastAction] = useState<null | (() => void)>(null);
   const [homeTeam, setHomeTeam] = useState<string>("");
   const [awayTeam, setAwayTeam] = useState<string>("");
+  const [logoUrl, setLogoUrl] = useState<string>("/blues_logo.png");
+  const [bgColor, setBgColor] = useState<string>("#003087");
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const [savedGames, setSavedGames] = useState<GameSummary[]>([]);
 
@@ -92,7 +94,6 @@ export default function ShotsOnGoalApp() {
 
   // --- Main logic for SOG/Goals/Undo/Reset ---
   const updateStat = (
-    team: "home" | "away",
     statType: "homeShots" | "awayShots" | "homeGoals" | "awayGoals",
     delta: number
   ) => {
@@ -106,15 +107,15 @@ export default function ShotsOnGoalApp() {
   const handleShot = (team: "home" | "away") => {
     const statType =
       team === "home" ? "homeShots" : "awayShots";
-    updateStat(team, statType, 1);
-    setLastAction(() => () => updateStat(team, statType, -1));
+    updateStat(statType, 1);
+    setLastAction(() => () => updateStat(statType, -1));
   };
 
   const handleGoal = (team: "home" | "away") => {
     const statType =
       team === "home" ? "homeGoals" : "awayGoals";
-    updateStat(team, statType, 1);
-    setLastAction(() => () => updateStat(team, statType, -1));
+    updateStat(statType, 1);
+    setLastAction(() => () => updateStat(statType, -1));
   };
 
   const handleUndo = () => {
@@ -131,12 +132,12 @@ export default function ShotsOnGoalApp() {
   if (!gameStarted) {
     return (
       <div style={{
-        fontFamily: 'system-ui, sans-serif', background: '#003087', minHeight: '100vh', color: 'white',
+        fontFamily: 'system-ui, sans-serif', background: bgColor, minHeight: '100vh', color: 'white',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
       }}>
         <img
-          src="/blues_logo.png"
-          alt="Blues Logo"
+          src={logoUrl}
+          alt="Team Logo"
           style={{ width: 120, margin: '30px auto 10px', display: 'block' }}
         />
         <h2>Start New Game</h2>
@@ -158,6 +159,23 @@ export default function ShotsOnGoalApp() {
             style={inputStyle}
           />
         </div>
+        <div style={{ marginBottom: 20 }}>
+          <input
+            type="text"
+            placeholder="Logo Image URL"
+            value={logoUrl}
+            onChange={e => setLogoUrl(e.target.value)}
+            style={inputStyle}
+          />
+        </div>
+        <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center' }}>
+          <label style={{ marginRight: 10 }}>Background:</label>
+          <input
+            type="color"
+            value={bgColor}
+            onChange={e => setBgColor(e.target.value)}
+          />
+        </div>
         <button
           style={{ ...blueBtn, width: 180, fontSize: 22 }}
           disabled={!homeTeam || !awayTeam}
@@ -172,12 +190,12 @@ export default function ShotsOnGoalApp() {
   // --- Main App UI ---
   return (
     <div style={{
-      fontFamily: 'system-ui, sans-serif', background: '#003087', minHeight: '100vh', color: 'white',
+      fontFamily: 'system-ui, sans-serif', background: bgColor, minHeight: '100vh', color: 'white',
       padding: 0, margin: 0, display: 'flex', flexDirection: 'column', alignItems: 'center'
     }}>
       <img
-        src="/blues_logo.png"
-        alt="Blues Logo"
+        src={logoUrl}
+        alt="Team Logo"
         style={{ width: 120, margin: '30px auto 10px', display: 'block' }}
       />
       {/* Period selector */}
